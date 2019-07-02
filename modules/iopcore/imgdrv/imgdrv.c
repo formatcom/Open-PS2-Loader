@@ -26,7 +26,7 @@ int dummy_fs()
 	return 0;
 }
 
-int lseek_fs(iop_file_t* fd, unsigned long offset, int whence)
+int lseek_fs(iop_file_t* fd, int offset, int whence)
 {
 	if (whence == SEEK_END)
 	{
