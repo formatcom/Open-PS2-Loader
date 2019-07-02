@@ -42,6 +42,7 @@
 #define WRITE_SECTOR(d, a)		scache_writeSector((d)->cache, (a))
 #define FLUSH_SECTORS(d)		scache_flushSectors((d)->cache)
 
+
 //---------------------------------------------------------------------------
 /*
  reorder (swap) the cluster stack records
@@ -726,10 +727,10 @@ void setSfnDate(fat_direntry_sfn* dsfn, int mode) {
     sec = 0;
 #else
 	//ps2 specific routine to get time and date
-	cd_clock_t	cdtime;
+	sceCdCLOCK cdtime;
 	s32		tmp;
 
-	if(CdReadClock(&cdtime)!=0 && cdtime.stat==0)
+	if(sceCdReadClock(&cdtime)!=0 && cdtime.stat==0)
 	{
 
 		tmp=cdtime.second>>4;

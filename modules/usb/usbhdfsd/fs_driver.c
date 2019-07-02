@@ -356,7 +356,7 @@ int fs_close(iop_file_t* fd) {
 }
 
 //---------------------------------------------------------------------------
-int fs_lseek(iop_file_t* fd, unsigned long offset, int whence) {
+int fs_lseek(iop_file_t* fd, int offset, int whence) {
 	fat_driver* fatd;
 	fs_rec* rec = (fs_rec*)fd->privdata;
 
@@ -814,7 +814,7 @@ int fs_checkClusterChain(iop_file_t *fd, char *name)
 }
 
 //---------------------------------------------------------------------------
-int fs_ioctl(iop_file_t *fd, unsigned long request, void *data)
+int fs_ioctl(iop_file_t *fd, int request, void *data)
 {
 	fat_driver* fatd;
 	fs_dir* rec = (fs_dir *) fd->privdata;
