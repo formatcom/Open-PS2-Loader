@@ -27,7 +27,7 @@
 #define	TIMEOUT				(300*1000)
 #define	MAX_REQ_CNT			8
 
-typedef struct ip_addr IPAddr;
+typedef struct ip4_addr IPAddr;
 typedef struct netif   NetIF;
 typedef struct SMapIF  SMapIF;
 typedef struct pbuf    PBuf;
@@ -188,32 +188,44 @@ static err_t SMapLowLevelOutput ( NetIF* pNetIF, PBuf* pOutput ) {
 
 }  /* end SMapLowLevelOutput */
 
-static err_t SMapOutput ( NetIF* pNetIF, PBuf* pOutput, IPAddr* pIPAddr ) {
+//SMapOutput():
 
- PBuf* pBuf = etharp_output ( pNetIF, pIPAddr, pOutput );
+//This function is called by the TCP/IP stack when an IP packet should be sent. It'll be invoked in the context of the
+//tcpip-thread, hence no synchronization is required.
+// For LWIP versions before v1.3.0.
+#ifdef PRE_LWIP_130_COMPAT
+static err_t
+SMapOutput(struct netif *pNetIF, struct pbuf *pOutput, IPAddr* pIPAddr)
+{
+	struct pbuf *pBuf=etharp_output(pNetIF,pIPAddr,pOutput);
 
- return pBuf ? SMapLowLevelOutput ( pNetIF, pBuf ) : ERR_OK;
-
-}  /* end SMapOutput */
+	return	pBuf!=NULL ? SMapLowLevelOutput(pNetIF, pBuf):ERR_OK;
+}
+#endif
 
 static err_t SMapIFInit ( NetIF* pNetIF ) {
 
- SIF.pNetIF = pNetIF;
- pNetIF -> state      = &NIF;
- pNetIF -> name[ 0 ]  = IFNAME0;
- pNetIF -> name[ 1 ]  = IFNAME1;
- pNetIF -> output     = SMapOutput;
- pNetIF -> linkoutput = SMapLowLevelOutput;
- pNetIF -> hwaddr_len = 6;
- pNetIF -> mtu        = 1500;
+	SIF.pNetIF = pNetIF;
+	pNetIF -> state      = &NIF;
+	pNetIF -> name[ 0 ]  = IFNAME0;
+	pNetIF -> name[ 1 ]  = IFNAME1;
+#ifdef PRE_LWIP_130_COMPAT
+	pNetIF->output=&SMapOutput;	// For LWIP versions before v1.3.0.
+#else
+	pNetIF->output=&etharp_output;	// For LWIP 1.3.0 and later.
+#endif
+	pNetIF -> linkoutput = SMapLowLevelOutput;
+	pNetIF -> hwaddr_len = 6;
+	pNetIF -> mtu        = 1500;
 
- mips_memcpy (  pNetIF -> hwaddr, SMap_GetMACAddress (), 6  );
+	mips_memcpy (  pNetIF -> hwaddr, SMap_GetMACAddress (), 6  );
 
- SMap_Start ();
+	SMap_Start ();
 
- return ERR_OK;
+	return ERR_OK;
 
 }  /* end SMapIFInit */
+
 
 static int SMapInit ( IPAddr IP, IPAddr NM, IPAddr GW ) {
 
