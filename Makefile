@@ -28,7 +28,7 @@ LOADER_OBJS = obj/loader.o \
 		obj/ps2fs.o obj/util.o obj/ioptrap.o obj/ps2link.o
 
 ifeq ($(VMC),1)
-LOADER_OBJS += obj/usb_mcemu.o obj/hdd_mcemu.o obj/smb_mcemu.o 
+LOADER_OBJS += obj/usb_mcemu.o obj/hdd_mcemu.o obj/smb_mcemu.o
 endif
 
 EE_BIN = opl.elf
@@ -41,7 +41,7 @@ EE_LIBS = -L$(FT_LIBDIR) -L$(PS2SDK)/ports/lib -L$(GSKIT)/lib -lgskit -ldmakit -
 #EE_LIBS = -L$(FT_LIBDIR) -L$(PS2SDK)/ports/lib -L$(GSKIT)/lib -lgskit -ldmakit -lgskit_toolkit -ldebug -lpoweroff -lfileXio -lpatches -lpad -lm -lmc -lfreetype
 EE_INCS += -I$(PS2SDK)/ports/include -I$(GSKIT)/include -I$(GSKIT)/ee/dma/include -I$(GSKIT)/ee/gs/include -I$(GSKIT)/ee/toolkit/include -I$(FT_DIR)/include
 
-ifeq ($(DEBUG),1) 
+ifeq ($(DEBUG),1)
 EE_CFLAGS := -D__DEBUG -g
 ifeq ($(EESIO_DEBUG),1)
 EE_CFLAGS += -D__EESIO_DEBUG
@@ -73,11 +73,11 @@ all:
 	echo "Building Freetype..."
 	$(MAKE) -C $(FT_DIR) setup ps2 > /dev/null
 	$(MAKE) -C $(FT_DIR)
-	
+
 	echo "Building Open PS2 Loader..."
 	echo "    * Interface"
 	$(MAKE) $(EE_BIN)
-	
+
 ifeq ($(DEBUG),0)
 	echo "Stripping..."
 	ee-strip opl.elf
@@ -88,7 +88,7 @@ endif
 
 childproof:
 	$(MAKE) CHILDPROOF=1 all
-	
+
 debug:
 	$(MAKE) DEBUG=1 all
 
@@ -469,34 +469,34 @@ load6.s:
 
 load7.s:
 	bin2s gfx/load7.png asm/load7.s load7_png
-	
+
 logo.s:
 	bin2s gfx/logo.png asm/logo.s logo_png
-		
+
 exit_icon.s:
 	bin2s gfx/exit.png asm/exit_icon.s exit_png
-	
+
 config_icon.s:
 	bin2s gfx/config.png asm/config_icon.s config_png
-	
+
 save_icon.s:
 	bin2s gfx/save.png asm/save_icon.s save_png
 
 usb_icon.s:
 	bin2s gfx/usb.png asm/usb_icon.s usb_png
-	
+
 hdd_icon.s:
 	bin2s gfx/hdd.png asm/hdd_icon.s hdd_png
-	
+
 eth_icon.s:
 	bin2s gfx/eth.png asm/eth_icon.s eth_png
-		
+
 app_icon.s:
 	bin2s gfx/app.png asm/app_icon.s app_png
-  
+
 disc_icon.s:
 	bin2s gfx/disc.png asm/disc_icon.s disc_png
-	
+
 cross_icon.s:
 	bin2s gfx/cross.png asm/cross_icon.s cross_png
 
@@ -544,10 +544,10 @@ freesans.s:
 
 icon_sys.s:
 	bin2s gfx/icon.sys asm/icon_sys.s icon_sys
-	
+
 icon_icn.s:
-	bin2s gfx/opl.icn asm/icon_icn.s icon_icn	
-  
+	bin2s gfx/opl.icn asm/icon_icn.s icon_icn
+
 $(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 

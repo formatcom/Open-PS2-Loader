@@ -133,7 +133,7 @@ static int texPngEnd(png_structp pngPtr, png_infop infoPtr, FILE* file, int stat
 
 static void texPngReadFunction(png_structp pngPtr, png_bytep data, png_size_t length)
 {
-	FILE* File = (FILE*) pngPtr->io_ptr;
+	FILE* File = (FILE*) png_get_io_ptr(pngPtr);
 	if(fread(data, length, 1, File) <= 0)
 	{
 		png_error(pngPtr, "Error reading via fread\n");
@@ -143,9 +143,18 @@ static void texPngReadFunction(png_structp pngPtr, png_bytep data, png_size_t le
 
 static void texPngReadMemFunction(png_structp pngPtr, png_bytep data, png_size_t length)
 {
+
+	void **PngBufferPtr = png_get_io_ptr(pngPtr);
+
+    memcpy(data, *PngBufferPtr, length);
+    *PngBufferPtr = (u8 *)(*PngBufferPtr) + length;
+
+
+	/* Original OPL 0.8
 	u8* memBuffer = (u8*) pngPtr->io_ptr;
 	memcpy(data, memBuffer, length);
 	pngPtr->io_ptr = memBuffer + length;
+	*/
 }
 
 
@@ -240,7 +249,7 @@ int texPngLoad(GSTEXTURE* texture, char* path, int texId, short psm) {
 	if(!infoPtr)
 		return texPngEnd(pngPtr, infoPtr, file, ERR_INFO_STRUCT);
 
-	if(setjmp(pngPtr->jmpbuf))
+	if(setjmp(png_jmpbuf(pngPtr)))
 		return texPngEnd(pngPtr, infoPtr, file, ERR_SET_JMP);
 
 	png_set_read_fn(pngPtr, readData, readFunction);
@@ -256,13 +265,13 @@ int texPngLoad(GSTEXTURE* texture, char* path, int texId, short psm) {
 	texUpdate(texture, pngWidth, pngHeight);
 
 	void (*texPngReadPixels)(GSTEXTURE* texture, png_bytep *rowPointers);
-	if(pngPtr->color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+	if(png_get_color_type(pngPtr, infoPtr) == PNG_COLOR_TYPE_RGB_ALPHA)
 	{
 		// if PNG have alpha, then it fits for every case (even if we only wanted RGB)
 		texture->PSM = GS_PSM_CT32;
 		texPngReadPixels = &texPngReadPixels32;
 	}
-	else if(pngPtr->color_type == PNG_COLOR_TYPE_RGB)
+	else if(png_get_color_type(pngPtr, infoPtr) == PNG_COLOR_TYPE_RGB)
 	{
 		if (psm != GS_PSM_CT24)
 			return texPngEnd(pngPtr, infoPtr, file, ERR_MISSING_ALPHA);

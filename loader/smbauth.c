@@ -16,7 +16,8 @@
 #define DMA_ADDR 		0x000cff00
 #define	UNCACHEDSEG(vaddr)	(0x20000000 | vaddr)
 
-extern int _gp;
+// ps2sdk/ee/include/kernel.h:74: previous declaration of `_gp'
+// extern int _gp;
 
 /* EE DMAC registers.  */
 #define DMAC_COMM_STAT	0x1000e010

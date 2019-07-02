@@ -239,8 +239,8 @@ void sysApplyFILEIOPatches(void)
 void sysReset(int modload_mask) {
 
 	SifInitRpc(0);
-	cdInit(CDVD_INIT_NOCHECK);
-	cdInit(CDVD_INIT_EXIT);
+	sceCdInit(SCECdINoD);
+	sceCdInit(SCECdEXIT);
 
 	while(!SifIopReset("rom0:UDNL rom0:EELOADCNF",0));
 	while(!SifIopSync());
@@ -398,57 +398,55 @@ unsigned int USBA_crc32(char *string) {
 	return crc;
 }
 
-int sysGetDiscID(char *hexDiscID) {
+int sysGetDiscID(char *hexDiscID)
+{
+    u8 key[16];
 
-	cdInit(CDVD_INIT_NOCHECK);
-	LOG("cdvd RPC inited\n");
-	if (cdStatus() == CDVD_STAT_OPEN) // If tray is open, error
-		return -1;
-		
-	while (cdGetDiscType() == CDVD_TYPE_DETECT) {;}	// Trick : if tray is open before startup it detects it as closed...
-	if (cdGetDiscType() == CDVD_TYPE_NODISK)
-		return -1;
+    if (sceCdStatus() == SCECdErOPENS) // If tray is open, error
+        return -1;
 
-	cdDiskReady(0); 	
-	LOG("Disc drive is ready\n");
-	CdvdDiscType_t cdmode = cdGetDiscType();	// If tray is closed, get disk type
-	if (cdmode == CDVD_TYPE_NODISK)
-		return -1;
+    while (sceCdGetDiskType() == SCECdDETCT) {
+        ;
+    }
+    if (sceCdGetDiskType() == SCECdNODISC)
+        return -1;
 
-	if ((cdmode != CDVD_TYPE_PS2DVD) && (cdmode != CDVD_TYPE_PS2CD) && (cdmode != CDVD_TYPE_PS2CDDA)) {
-		cdStop();
-		cdSync(0);
-		LOG("Disc stopped\n");
-		LOG("Disc is not ps2 disc!\n");
-		return -2;
-	}
+    sceCdDiskReady(0);
+    LOG("SYSTEM Disc drive is ready\n");
+    int cdmode = sceCdGetDiskType();
+    if (cdmode == SCECdNODISC)
+        return -1;
 
-	cdStandby();
-	cdSync(0);
-	LOG("Disc standby\n");
+    if ((cdmode != SCECdPS2DVD) && (cdmode != SCECdPS2CD) && (cdmode != SCECdPS2CDDA)) {
+        sceCdStop();
+        sceCdSync(0);
+        LOG("SYSTEM Disc stopped, Disc is not ps2 disc!\n");
+        return -2;
+    }
 
-	int fd = fioOpen("discID:", O_RDONLY);
-	if (fd < 0) {
-		cdStop();
-		cdSync(0);
-		LOG("Disc stopped\n");
-		return -3;
-	}
+    LOG("SYSTEM Disc standby\n");
+    sceCdStandby();
+    sceCdSync(0);
 
-	unsigned char discID[5];
-	memset(discID, 0, 5);
-	fioRead(fd, discID, 5);
-	fioClose(fd);
+    LOG("SYSTEM Disc read key\n");
+    if (sceCdReadKey(0, 0, 0x4b, key) == 0) {
+        LOG("SYSTEM Cannot read CD/DVD key.\n");
+        sceCdStop();
+        sceCdSync(0);
+        LOG("SYSTEM Disc stopped\n");
+        return -3;
+    }
 
-	cdStop();
-	cdSync(0);
-	LOG("Disc stopped\n");
+    sceCdStop();
 
-	// convert to hexadecimal string
-	snprintf(hexDiscID, 15, "%02X %02X %02X %02X %02X", discID[0], discID[1], discID[2], discID[3], discID[4]);
-	LOG("PS2 Disc ID = %s\n", hexDiscID);
+    // convert to hexadecimal string
+    snprintf(hexDiscID, 15, "%02X %02X %02X %02X %02X", key[10], key[11], key[12], key[13], key[14]);
+    LOG("SYSTEM PS2 Disc ID = %s\n", hexDiscID);
 
-	return 1;
+    sceCdSync(0);
+    LOG("SYSTEM Disc stopped\n");
+
+    return 1;
 }
 
 int sysPcmciaCheck(void) {

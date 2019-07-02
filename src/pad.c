@@ -341,7 +341,7 @@ void unloadPads() {
 	for (i = 0; i < pad_count; ++i)
 		unloadPad(&pad_data[i]);
 	
-	padReset();
+	padEnd();
 }
 
 /** Tries to start a single pad.

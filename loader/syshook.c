@@ -454,8 +454,8 @@ void Install_Kernel_Hooks(void)
 	Old_SifSetReg  = GetSyscallHandler(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, &Hook_SifSetReg);
 
-	Old_LoadExecPS2 = GetSyscallHandler(__NR_LoadExecPS2);
-	SetSyscall(__NR_LoadExecPS2, &Hook_LoadExecPS2);
+	Old_LoadExecPS2 = GetSyscallHandler(__NR__LoadExecPS2);
+	SetSyscall(__NR__LoadExecPS2, &Hook_LoadExecPS2);
 
 	// If IGR is enabled hook ExecPS2 & CreateThread syscalls
 	if(!(g_compat_mask & COMPAT_MODE_6))
@@ -463,8 +463,8 @@ void Install_Kernel_Hooks(void)
 		Old_CreateThread = GetSyscallHandler(__NR_CreateThread);
 		SetSyscall(__NR_CreateThread, &Hook_CreateThread);
 
-		Old_ExecPS2 = GetSyscallHandler(__NR_ExecPS2);
-		SetSyscall(__NR_ExecPS2, &Hook_ExecPS2);
+		Old_ExecPS2 = GetSyscallHandler(__NR__ExecPS2);
+		SetSyscall(__NR__ExecPS2, &Hook_ExecPS2);
 	}
 }
 
@@ -478,12 +478,12 @@ void Remove_Kernel_Hooks(void)
 
 	SetSyscall(__NR_SifSetDma, Old_SifSetDma);
 	SetSyscall(__NR_SifSetReg, Old_SifSetReg);	
-	SetSyscall(__NR_LoadExecPS2, Old_LoadExecPS2);
+	SetSyscall(__NR__LoadExecPS2, Old_LoadExecPS2);
 
 	// If IGR is enabled unhook ExecPS2 & CreateThread syscalls
 	if(!(g_compat_mask & COMPAT_MODE_6))
 	{
 		SetSyscall(__NR_CreateThread, Old_CreateThread);
-		SetSyscall(__NR_ExecPS2, Old_ExecPS2);
+		SetSyscall(__NR__ExecPS2, Old_ExecPS2);
 	}
 }
